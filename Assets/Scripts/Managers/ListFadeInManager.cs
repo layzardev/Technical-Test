@@ -1,36 +1,40 @@
-using UnityEngine;
-using System.Collections.Generic;
+﻿using UnityEngine;
 using DG.Tweening;
 
 public class ListFadeInManager : MonoBehaviour
 {
-    [Header("Animasi Settings")]
+    [Header("Animasi")]
     public float fadeTime = 0.5f;
     public float delayBetweenItems = 0.1f;
 
+    // Menjalankan animasi fade-in untuk semua child di container
     public void PlayFadeIn(Transform container)
     {
-        List<CanvasGroup> canvasGroups = new List<CanvasGroup>();
-
-        // Siapkan CanvasGroup untuk setiap item
-        foreach (Transform child in container)
+        for (int i = 0; i < container.childCount; i++)
         {
-            if (child == null) continue;
+            Transform child = container.GetChild(i);
 
             CanvasGroup cg = child.GetComponent<CanvasGroup>();
             if (cg == null) cg = child.gameObject.AddComponent<CanvasGroup>();
 
             cg.alpha = 0f;
-            canvasGroups.Add(cg);
+            cg.DOFade(1f, fadeTime)
+              .SetDelay(i * delayBetweenItems)
+              .SetEase(Ease.OutCubic);
         }
+    }
 
-        // Jalankan animasi fade-in
-        for (int i = 0; i < canvasGroups.Count; i++)
+    // Langsung tampilkan semua child tanpa animasi
+    public void ShowInstant(Transform container)
+    {
+        for (int i = 0; i < container.childCount; i++)
         {
-            canvasGroups[i]
-                .DOFade(1f, fadeTime)
-                .SetDelay(i * delayBetweenItems)
-                .SetEase(Ease.OutCubic);
+            Transform child = container.GetChild(i);
+
+            CanvasGroup cg = child.GetComponent<CanvasGroup>();
+            if (cg == null) cg = child.gameObject.AddComponent<CanvasGroup>();
+
+            cg.alpha = 1f;
         }
     }
 }

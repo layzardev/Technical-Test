@@ -11,24 +11,25 @@ public class QuestManager : MonoBehaviour
     public GameObject questItemPrefab;
     public QuestDetailPopup questDetailPopup;
 
-    private UIManager uiManager;
-    private ListFadeInManager fadeAnimator;
+    [Header("Komponen Lain")]
+    public UIManager uiManager;
+    public ListFadeInManager fadeManager;
 
     private void Start()
     {
-        uiManager = FindAnyObjectByType<UIManager>();
-        fadeAnimator = GetComponent<ListFadeInManager>();
+        if (uiManager == null) uiManager = FindAnyObjectByType<UIManager>();
+        if (fadeManager == null) fadeManager = GetComponent<ListFadeInManager>();
 
-        LoadUI();
+        LoadUI(true);
     }
 
-    public void LoadUI()
+    public void LoadUI(bool withAnimation = true)
     {
-        // Bersihkan list lama
+        // Bersihkan list
         foreach (Transform child in questListContainer)
             Destroy(child.gameObject);
 
-        // Spawn quest item baru
+        // Spawn quest items
         foreach (var quest in allQuests)
         {
             GameObject item = Instantiate(questItemPrefab, questListContainer);
@@ -36,9 +37,11 @@ public class QuestManager : MonoBehaviour
             uiQuest.SetData(quest, this);
         }
 
-        // Panggil animasi fade-in
-        if (fadeAnimator != null)
-            fadeAnimator.PlayFadeIn(questListContainer);
+        // Jalankan animasi / tampilkan langsung
+        if (withAnimation)
+            fadeManager.PlayFadeIn(questListContainer);
+        else
+            fadeManager.ShowInstant(questListContainer);
     }
 
     public void ShowDetail(QuestData quest)
@@ -59,7 +62,8 @@ public class QuestManager : MonoBehaviour
 
         Debug.Log($"Quest '{quest.Nama}' berhasil di-claim!");
 
-        LoadUI();
+        // Refresh tanpa animasi
+        LoadUI(false);
 
         if (uiManager.IsPopupVisible)
         {
